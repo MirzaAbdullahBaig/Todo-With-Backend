@@ -1,10 +1,12 @@
 import express from "express";
+import cors from "cors"
 import { v4 as uuidv4 } from "uuid"; // Unique id generator
 // import { faker } from "@faker-js/faker"; // fake username generator
 
 const app = express();
 const port = process.env.PORT || 3000;
 
+app.use(cors({ origin: ["http://localhost:5173", "http://localhost:3000"] }))
 app.use(express.json());
 
 const todos = [];
@@ -15,8 +17,8 @@ app.get("/get-all-todos", (request, response) => {
     : "Here is All Todos";
 
   response.send({
-    data: todos,
     message: message,
+    data: todos,
   });
 });
 
