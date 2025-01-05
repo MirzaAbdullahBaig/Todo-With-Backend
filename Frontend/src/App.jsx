@@ -1,106 +1,159 @@
-import React, { useState } from "react";
-
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
 
 function App() {
+  const BASE_URL = "http://localhost:3000";
   const [darkMode, setDarkMode] = useState(true);
+  const [todos, setTodos] = useState([]);
+  const [newTodo, setNewTodo] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const getTodos = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${BASE_URL}/get-all-todos`);
+      setTodos(response?.data?.data || []);
+    } catch (error) {
+      toast.error("Todos not found");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addTodo = async () => {
+    if (!newTodo.trim()) return toast.error("Todo content is required");
+    try {
+      await axios.post(`${BASE_URL}/add-todo`, { todo: newTodo });
+      setNewTodo(""); // Clear input
+      getTodos(); // Refresh todos
+      toast.success("Todo added successfully");
+    } catch (error) {
+      toast.error("Error adding todo");
+    }
+  };
+
+  const deleteTodo = async (id) => {
+    try {
+      await axios.delete(`${BASE_URL}/delete-todo/${id}`);
+      getTodos(); // Refresh todos
+      toast("Todo Delete");
+    } catch (error) {
+      toast.error("Error deleting todo");
+    }
+  };
+
+  const editTodo = async (id, updatedContent) => {
+    try {
+      await axios.patch(`${BASE_URL}/edit-todo/${id}`, {
+        todo: updatedContent,
+      });
+      getTodos(); // Refresh todos
+      toast.success("Todo Edited");
+    } catch (error) {
+      toast.error("Todo content is required");
+    }
+  };
+
+  useEffect(() => {
+    getTodos();
+  }, []);
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      addTodo();
+    }
+  };
 
   return (
-    <div
-      className={`min-h-screen flex items-center justify-center p-4 transition-colors duration-300 ${
-        darkMode ? "bg-gray-900 text-gray-100" : "bg-gray-100 text-gray-900"
-      }`}
-    >
+    <div>
+      <ToastContainer />
       <div
-        className={`shadow-lg rounded-lg w-full max-w-md transition-colors duration-300 ${
-          darkMode ? "bg-gray-800" : "bg-white"
+        className={`min-h-screen flex items-center justify-center p-4 transition-colors duration-300 ${
+          darkMode ? "bg-gray-900 text-gray-100" : "bg-gray-100 text-gray-900"
         }`}
       >
-        <header
-          className={`text-center py-4 rounded-t-lg transition-colors duration-300 ${
-            darkMode ? "bg-gray-700 text-gray-100" : "bg-blue-500 text-white"
+        <div
+          className={`shadow-lg rounded-lg w-full max-w-md transition-colors duration-300 ${
+            darkMode ? "bg-gray-800" : "bg-white"
           }`}
         >
-          <h1 className="text-2xl font-semibold">Todo App</h1>
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className={`mt-2 px-4 py-2 text-sm rounded-md border focus:outline-none focus:ring-2 ${
-              darkMode
-                ? "border-gray-500 text-gray-100 hover:bg-gray-600"
-                : "border-blue-100 text-blue-100 hover:bg-blue-600"
+          <header
+            className={`text-center py-4 rounded-t-lg transition-colors duration-300 ${
+              darkMode ? "bg-gray-700 text-gray-100" : "bg-blue-500 text-white"
             }`}
           >
-            Toggle {darkMode ? "Light" : "Dark"} Mode
-          </button>
-        </header>
-
-        <div className="p-4">
-          <div className="flex items-center space-x-2">
-            <input
-              type="text"
-              placeholder="Add a new task..."
-              className={`flex-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 transition-colors duration-300 ${
-                darkMode
-                  ? "bg-gray-700 border-gray-600 text-gray-100 focus:ring-gray-500"
-                  : "bg-white border-gray-300 text-gray-900 focus:ring-blue-500"
-              }`}
-            />
+            <h1 className="text-2xl font-semibold">Todo App</h1>
             <button
-              className={`px-4 py-2 rounded-md transition-colors duration-300 ${
-                darkMode
-                  ? "bg-gray-600 text-gray-100 hover:bg-gray-500"
-                  : "bg-blue-500 text-white hover:bg-blue-600"
-              }`}
+              onClick={() => setDarkMode(!darkMode)}
+              className="mt-2 px-4 py-2 text-sm rounded-md border focus:outline-none focus:ring-2"
             >
-              Add
+              Toggle {darkMode ? "Light" : "Dark"} Mode
             </button>
+          </header>
+
+          <div className="p-4">
+            <div className="flex items-center space-x-2">
+              <input
+                type="text"
+                value={newTodo}
+                onChange={(e) => setNewTodo(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Add a new task..."
+                className={`flex-1 px-4 py-2 border rounded-md ${
+                  darkMode ? "bg-gray-700" : "bg-white"
+                }`}
+              />
+              <button
+                type="button"
+                onClick={addTodo}
+                className="px-4 py-2 rounded-md bg-blue-500 text-white"
+              >
+                Add
+              </button>
+            </div>
+
+            {loading ? (
+              <div className="text-center mt-4">Loading...</div>
+            ) : (
+              <ul className="mt-6 space-y-4">
+                {todos.map((todo) => (
+                  <li
+                    key={todo.id}
+                    className={`flex items-center justify-between p-3 rounded-md shadow-sm ${
+                      darkMode ? "bg-gray-700" : "bg-gray-100"
+                    }`}
+                  >
+                    <span>{todo.todoContent}</span>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() =>
+                          editTodo(
+                            todo.id,
+                            prompt("Edit Todo:", todo.todoContent)
+                          )
+                        }
+                        className="text-blue-500"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => deleteTodo(todo.id)}
+                        className="text-red-500"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
-          <ul className="mt-6 space-y-4">
-            {/* Example of Todo Item */}
-            {["Buy groceries", "Walk the dog", "Read a book"].map(
-              (todo, index) => (
-                <li
-                  key={index}
-                  className={`flex items-center justify-between p-3 rounded-md shadow-sm transition-colors duration-300 ${
-                    darkMode
-                      ? "bg-gray-700 hover:bg-gray-600"
-                      : "bg-gray-100 hover:bg-gray-200"
-                  }`}
-                >
-                  <span>{todo}</span>
-                  <div className="flex items-center space-x-2">
-                    <button
-                      className={`transition-colors duration-300 ${
-                        darkMode
-                          ? "text-gray-300 hover:text-gray-100"
-                          : "text-blue-500 hover:text-blue-600"
-                      }`}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className={`transition-colors duration-300 ${
-                        darkMode
-                          ? "text-red-400 hover:text-red-500"
-                          : "text-red-500 hover:text-red-600"
-                      }`}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </li>
-              )
-            )}
-          </ul>
+          <footer className="text-center py-2">
+            <p className="text-sm">&copy; 2025 Todo App</p>
+          </footer>
         </div>
-
-        <footer
-          className={`text-center py-2 rounded-b-lg transition-colors duration-300 ${
-            darkMode ? "bg-gray-700 text-gray-400" : "bg-gray-100 text-gray-500"
-          }`}
-        >
-          <p className="text-sm">&copy; 2025 Todo App</p>
-        </footer>
       </div>
     </div>
   );
