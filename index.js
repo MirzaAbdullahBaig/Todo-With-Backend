@@ -11,6 +11,10 @@ app.use(express.json());
 
 const todos = [];
 
+app.get("/", (req, res) => {
+  res.send("Welcome")
+})
+
 app.get("/get-all-todos", (request, response) => {
   const message = !todos.length
     ? "Todos container is empty"
