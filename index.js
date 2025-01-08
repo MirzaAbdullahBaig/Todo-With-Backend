@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from "uuid"; // Unique id generator
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(cors({ origin: ["http://localhost:5173", "http://localhost:3000"] }))
+app.use(cors({ origin: ["http://localhost:5173", "https://todo-frontend-ten-gamma.vercel.app"] }))
 app.use(express.json());
 
 const todos = [];
