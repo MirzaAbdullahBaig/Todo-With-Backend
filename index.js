@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid"; // Unique id generator
 // import { faker } from "@faker-js/faker"; // fake username generator
 
 const app = express();
-const port = process.env.port || 3000;
+const port = process.env.PORT || 3000;
 
 app.use(cors({ origin: ["http://localhost:5173", "http://localhost:3000"] }))
 app.use(express.json());
