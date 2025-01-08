@@ -12,7 +12,7 @@ function App() {
   const getTodos = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${BASE_URL}/get-all-todos`);
+      const response = await axios(`${BASE_URL}/get-all-todos`);
       setTodos(response?.data?.data || []);
     } catch (error) {
       toast.error("Todos not found");
@@ -27,7 +27,6 @@ function App() {
       await axios.post(`${BASE_URL}/add-todo`, { todo: newTodo });
       setNewTodo(""); // Clear input
       getTodos(); // Refresh todos
-      toast.success("Todo added successfully");
     } catch (error) {
       toast.error("Error adding todo");
     }
@@ -37,7 +36,7 @@ function App() {
     try {
       await axios.delete(`${BASE_URL}/delete-todo/${id}`);
       getTodos(); // Refresh todos
-      toast("Todo Delete");
+      toast("Todo Deleted");
     } catch (error) {
       toast.error("Error deleting todo");
     }
@@ -60,7 +59,7 @@ function App() {
   }, []);
 
   const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
+    if (e.key === "e" || e.key === "E" || e.key === "Enter") {
       addTodo();
     }
   };
