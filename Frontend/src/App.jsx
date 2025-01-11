@@ -15,6 +15,7 @@ function App() {
       const response = await axios(`${BASE_URL}/get-all-todos`);
       setTodos(response?.data?.data || []);
     } catch (error) {
+      toast.dismiss();
       toast.error("Todos not found");
     } finally {
       setLoading(false);
@@ -22,12 +23,14 @@ function App() {
   };
 
   const addTodo = async () => {
-    if (!newTodo.trim()) return toast.error("Todo content is required");
+    if (!newTodo.trim())
+      return toast.dismiss(), toast.error("Todo content is required");
     try {
       await axios.post(`${BASE_URL}/add-todo`, { todo: newTodo });
       setNewTodo(""); // Clear input
       getTodos(); // Refresh todos
     } catch (error) {
+      toast.dismiss();
       toast.error("Error adding todo");
     }
   };
@@ -36,8 +39,10 @@ function App() {
     try {
       await axios.delete(`${BASE_URL}/delete-todo/${id}`);
       getTodos(); // Refresh todos
+      toast.dismiss();
       toast("Todo Deleted");
     } catch (error) {
+      toast.dismiss();
       toast.error("Error deleting todo");
     }
   };
@@ -48,8 +53,10 @@ function App() {
         todo: updatedContent,
       });
       getTodos(); // Refresh todos
+      toast.dismiss();
       toast.success("Todo Edited");
     } catch (error) {
+      toast.dismiss();
       toast.error("Todo content is required");
     }
   };
