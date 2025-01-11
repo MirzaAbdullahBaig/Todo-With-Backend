@@ -3,7 +3,7 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 
 function App() {
-  const BASE_URL = "https://todo-with-backend-beta.vercel.app";
+  const BASE_URL = "https://backend-todo-api.vercel.app";
   const [darkMode, setDarkMode] = useState(true);
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState("");
